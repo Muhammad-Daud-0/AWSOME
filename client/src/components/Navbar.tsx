@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * eslint-disable @typescript-eslint/no-explicit-any
  *
@@ -84,7 +85,7 @@ const Navbar = () => {
 												<User className="w-10 h-10 text-white" />
 											</div>
 											<span className="text-sm font-medium">
-												Hello, Admin {user.name}
+												Hello, {user.name}
 											</span>
 										</>
 									) : (

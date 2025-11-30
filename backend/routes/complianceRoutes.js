@@ -13,6 +13,7 @@ const {
 	deletePlan,
 } = require("../controllers/complianceController");
 
+
 const router = express.Router();
 
 // ------------------- POLICY ROUTES -------------------
@@ -42,20 +43,6 @@ router.put("/plans/:planId", requireSignIn, isAdmin, updatePlan);
 
 // Delete plan (admin only)
 router.delete("/plans/:planId", requireSignIn, isAdmin, deletePlan);
-
-module.exports = router;
-const express = require("express");
-const { requireSignIn, isAdmin } = require("../middlewares/authmiddleware");
-const {
-	getAllPolicies,
-	createPolicy,
-	updatePolicy,
-	deletePolicy,
-	getAllPlans,
-	createPlan,
-	updatePlan,
-	deletePlan,
-} = require("../controllers/complianceController");
 
 // ------------------- POLICY ROUTES -------------------
 

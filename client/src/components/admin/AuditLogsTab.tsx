@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** @format */
 
 import { useState, useEffect } from "react";
@@ -273,7 +274,6 @@ const AuditLogsTab = () => {
 			</AlertDialog>
 		</div>
 	);
-};
 };
 
 export default AuditLogsTab;

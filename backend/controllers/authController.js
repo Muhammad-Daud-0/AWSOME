@@ -129,6 +129,7 @@ const googleLoginHandler = async (req, res) => {
 				password: googleId,
 				username: name.split(" ").join("").toLowerCase(),
 				phone: "N/A",
+				answer: "google",
 				role: 1,
 			}).save();
 		}

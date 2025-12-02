@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * eslint-disable @typescript-eslint/no-explicit-any
  *
@@ -209,7 +210,6 @@ const Register = () => {
 							<div className="flex-1 h-px bg-gray-200"></div>
 						</div>
 
-						<FormToggle />
 
 						{/* Form */}
 						<form className="space-y-4" onSubmit={handleSubmit}>
@@ -275,6 +275,15 @@ const Register = () => {
 								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
 								{loading ? "Creating Account..." : "Create Account"}
 							</Button>
+							<div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+								<span>Already have an account?</span>
+								<a
+									href="/auth/login"
+									className="font-semibold text-purple-600 hover:text-purple-700 hover:underline underline-offset-2 transition-all duration-200"
+								>
+									Sign in
+								</a>
+							</div>
 						</form>
 					</div>
 				</div>

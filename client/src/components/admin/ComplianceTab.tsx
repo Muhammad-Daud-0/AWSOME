@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** @format */
 
 import { useState, useEffect } from "react";
@@ -43,7 +44,7 @@ import {
 } from "@/components/ui/select";
 
 interface Policy {
-	_id: string;
+	id: string;
 	name: string;
 	description: string;
 	enforced: boolean;
@@ -52,7 +53,7 @@ interface Policy {
 }
 
 interface Plan {
-	_id: string;
+	id: string;
 	name: string;
 	price: number;
 	features: string[];
@@ -147,7 +148,7 @@ const ComplianceTab = () => {
 	};
 
 	const handleTogglePolicy = async (id: string) => {
-		const policy = policies.find((p) => p._id === id);
+		const policy = policies.find((p) => p.id === id);
 		if (!policy) return;
 
 		try {
@@ -165,7 +166,7 @@ const ComplianceTab = () => {
 	};
 
 	const handleTogglePlan = async (id: string) => {
-		const plan = plans.find((p) => p._id === id);
+		const plan = plans.find((p) => p.id === id);
 		if (!plan) return;
 
 		try {
@@ -233,7 +234,7 @@ const ComplianceTab = () => {
 		setPolicySaving(true);
 		try {
 			const endpoint = editingPolicy
-				? `/compliance/policies/${editingPolicy._id}`
+				? `/compliance/policies/${editingPolicy.id}`
 				: "/compliance/policies";
 			const method = editingPolicy ? "put" : "post";
 			const response = await axiosInstance[method](endpoint, policyFormData);
@@ -259,9 +260,10 @@ const ComplianceTab = () => {
 		if (!deletePolicy) return;
 
 		setIsDeletingPolicy(true);
+		console.log(deletePolicy)
 		try {
 			const response = await axiosInstance.delete(
-				`/compliance/policies/${deletePolicy._id}`
+				`/compliance/policies/${deletePolicy.id}`
 			);
 			if (response.data.success) {
 				toast.success("Policy deleted successfully");
@@ -353,7 +355,7 @@ const ComplianceTab = () => {
 		setPlanSaving(true);
 		try {
 			const endpoint = editingPlan
-				? `/compliance/plans/${editingPlan._id}`
+				? `/compliance/plans/${editingPlan.id}`
 				: "/compliance/plans";
 			const method = editingPlan ? "put" : "post";
 			const response = await axiosInstance[method](endpoint, {
@@ -385,9 +387,10 @@ const ComplianceTab = () => {
 		if (!deletePlan) return;
 
 		setIsDeletingPlan(true);
+		console.log(deletePlan)
 		try {
 			const response = await axiosInstance.delete(
-				`/compliance/plans/${deletePlan._id}`
+				`/compliance/plans/${deletePlan.id}`
 			);
 			if (response.data.success) {
 				toast.success("Plan deleted successfully");
@@ -433,7 +436,7 @@ const ComplianceTab = () => {
 						) : (
 							policies.map((policy) => (
 								<div
-									key={policy._id}
+									key={policy.id}
 									className="p-4 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors border border-border/50">
 									<div className="flex items-start justify-between">
 										<div className="flex-1">
@@ -509,7 +512,7 @@ const ComplianceTab = () => {
 						) : (
 							plans.map((plan) => (
 								<div
-									key={plan._id}
+									key={plan.id}
 									className="p-4 rounded-lg border border-border/50 bg-secondary/20 hover:bg-secondary/30 transition-colors flex flex-col">
 									<div className="flex items-start justify-between mb-3">
 										<div className="flex-1">

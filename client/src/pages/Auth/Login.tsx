@@ -205,8 +205,6 @@ const LoginPage = () => {
 							<div className="flex-1 h-px bg-gray-200"></div>
 						</div>
 
-						<FormToggle />
-
 						{/* Email/Password Form */}
 						<form className="space-y-6" onSubmit={handleLogin}>
 							<div className="space-y-2">
@@ -214,9 +212,8 @@ const LoginPage = () => {
 								<Input
 									type="email"
 									placeholder="you@example.com"
-									className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 ${
-										errors.email ? "border-red-500" : ""
-									}`}
+									className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 ${errors.email ? "border-red-500" : ""
+										}`}
 									value={email}
 									onChange={(e) => {
 										setEmail(e.target.value);
@@ -235,9 +232,8 @@ const LoginPage = () => {
 									<Input
 										type={showPassword ? "text" : "password"}
 										placeholder="••••••••"
-										className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 pr-12 ${
-											errors.password ? "border-red-500" : ""
-										}`}
+										className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 pr-12 ${errors.password ? "border-red-500" : ""
+											}`}
 										value={password}
 										onChange={(e) => {
 											setPassword(e.target.value);
@@ -274,6 +270,15 @@ const LoginPage = () => {
 								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
 								{loading ? "Signing in..." : "Sign In"}
 							</Button>
+							<div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+								<span>Don't have an account?</span>
+								<a
+									href="/auth/register"
+									className="font-semibold text-purple-600 hover:text-purple-700 hover:underline underline-offset-2 transition-all duration-200"
+								>
+									Sign up
+								</a>
+							</div>
 						</form>
 					</div>
 				</div>
@@ -292,9 +297,8 @@ const LoginPage = () => {
 									key={index}
 									src={item.image}
 									alt={item.heading}
-									className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-										index === currentImageIndex ? "opacity-100" : "opacity-0"
-									}`}
+									className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+										}`}
 								/>
 							))}
 						</div>
@@ -320,11 +324,10 @@ const LoginPage = () => {
 									<button
 										key={index}
 										onClick={() => setCurrentImageIndex(index)}
-										className={`w-2 h-2 rounded-full transition-all ${
-											index === currentImageIndex
+										className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
 												? "bg-white w-6"
 												: "bg-white/50"
-										}`}
+											}`}
 									/>
 								))}
 							</div>

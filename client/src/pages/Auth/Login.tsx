@@ -13,17 +13,17 @@
 "use client";
 
 import { useState, useContext } from "react";
-import { ChevronLeft, ChevronRight, Cloud, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
 import axiosInstance from "@/api/axios";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { AuthContext } from "../../components/context/authContext";
 import RoleToggle from "@/components/RoleToggle";
 import FormToggle from "@/components/forms/FormToggle";
+import FloatingLabelInput from "@/components/ui/FloatingLabelInput";
+import Logo from "@/components/Logo";
 
 const LoginPage = () => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -31,9 +31,7 @@ const LoginPage = () => {
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-		{}
-	);
+	const [errors, setErrors] = useState<{ [key: string]: string }>({});
 	const navigate = useNavigate();
 	const authContext = useContext(AuthContext);
 
@@ -43,14 +41,18 @@ const LoginPage = () => {
 
 	// Validation logic
 	const validateForm = () => {
-		const newErrors: { email?: string; password?: string } = {};
-		if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+		const newErrors: { [key: string]: string } = {};
+		if (!email.trim()) {
+			newErrors.email = "Email is required";
+		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			newErrors.email = "Please enter a valid email";
 		}
-		if (!password || password.length < 6) {
-			newErrors.password = "Password must be at least 6 characters";
+		if (!password.trim()) {
+			newErrors.password = "Password is required";
+		} else if (password.length < 5) {
+			newErrors.password = "Password must be at least 5 characters";
 		}
-		setErrors(newErrors);
+		setErrors(newErrors as any);
 		return Object.keys(newErrors).length === 0;
 	};
 
@@ -90,21 +92,34 @@ const LoginPage = () => {
 				email,
 				password,
 			});
-			console.log(data);
-			toast.success("Login successful 🎉");
+
+			// Ensure role is properly typed as 1 or 2
+			const validRole = Number(data.user.role) === 2 ? 2 : 1;
 
 			login({
 				token: data.token,
-				role: data.user.role,
+				role: validRole,
 				name: data.user.name,
 				email: data.user.email,
 			});
 			// Flag for dashboard welcome toast
 			sessionStorage.setItem("loginWelcome", "true");
 
-			navigate(data.user.role === 2 ? "/admin" : "/dashboard");
+			navigate(validRole === 2 ? "/admin" : "/dashboard");
 		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Login failed ❌");
+			const errorMessage = err.response?.data?.message;
+
+			if (errorMessage?.toLowerCase().includes("not found")) {
+				setErrors({
+					email: "Account not found. Please check your credentials.",
+				});
+			} else if (errorMessage?.toLowerCase().includes("password")) {
+				setErrors({ password: "Invalid password. Please try again." });
+			} else {
+				setErrors({
+					form: errorMessage || "Login failed. Please try again.",
+				});
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -113,6 +128,7 @@ const LoginPage = () => {
 	// Google Login
 	const handleGoogleLogin = async (response: CredentialResponse) => {
 		if (!response.credential) return;
+		setErrors({}); // Clear errors on Google login attempt
 
 		setLoading(true);
 		try {
@@ -130,7 +146,6 @@ const LoginPage = () => {
 			const { data } = await axiosInstance.post("/auth/google-login", {
 				tokenId: response.credential,
 			});
-			toast.success("Google Login successful ⚡");
 
 			login({
 				token: data.token,
@@ -147,7 +162,24 @@ const LoginPage = () => {
 
 			navigate("/dashboard");
 		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Google login failed ❌");
+			const errorMessage = err.response?.data?.message?.toLowerCase() || "";
+
+			if (
+				errorMessage.includes("network") ||
+				errorMessage.includes("connect")
+			) {
+				setErrors({
+					form: "Network error. Please check your connection.",
+				});
+			} else if (errorMessage.includes("not found")) {
+				setErrors({
+					form: "Google account not found in our system.",
+				});
+			} else {
+				setErrors({
+					form: "Google login failed. Please try again.",
+				});
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -155,27 +187,6 @@ const LoginPage = () => {
 
 	return (
 		<div className="min-h-screen bg-white relative">
-			{/* GLOBAL TOASTER — placed once at root */}
-			<Toaster
-				position="top-center"
-				toastOptions={{
-					duration: 1000,
-					style: {
-						background: "#1f1f1f",
-						color: "#fff",
-						padding: "12px 16px",
-						borderRadius: "10px",
-						fontSize: "14px",
-					},
-					success: {
-						style: { background: "#22c55e" },
-					},
-					error: {
-						style: { background: "#ef4444" },
-					},
-				}}
-			/>
-
 			<div className="grid grid-cols-2 min-h-screen">
 				{/* Left Column */}
 				<div className="bg-white p-8 lg:p-12 flex flex-col justify-center">
@@ -184,24 +195,20 @@ const LoginPage = () => {
 						<button onClick={() => navigate("/")}>
 							<div className="flex items-center gap-2">
 								<div className="w-14 h-14 rounded-xl gradient-purple flex items-center justify-center shadow-lg group-hover:shadow-purple-glow transition-all duration-300">
-									<Cloud className="w-9 h-9 text-white" />
+									<Logo size="lg" />
 								</div>
 								<span className="text-3xl font-bold text-gradient">AWSOME</span>
 							</div>
-						</button>
-
+						</button>{" "}
 						<div className="space-y-3">
 							<h1 className="text-4xl font-bold text-gray-900">Welcome back</h1>
 							<p className="text-gray-500 text-lg">Sign in to your account</p>
 						</div>
-
 						<RoleToggle />
-
 						<GoogleLogin
 							onSuccess={handleGoogleLogin}
-							onError={() => toast.error("Google login failed")}
+							onError={() => setErrors({ form: "Google login failed" })}
 						/>
-
 						<div className="flex items-center gap-4">
 							<div className="flex-1 h-px bg-gray-200"></div>
 							<span className="text-gray-400 text-sm">
@@ -209,83 +216,75 @@ const LoginPage = () => {
 							</span>
 							<div className="flex-1 h-px bg-gray-200"></div>
 						</div>
-
 						{/* Email/Password Form */}
-						<form className="space-y-6" onSubmit={handleLogin}>
-							<div className="space-y-2">
-								<Label className="text-gray-700 font-medium">Email</Label>
-								<Input
+						<form className="space-y-5" onSubmit={handleLogin}>
+							<div className="form-field">
+								<FloatingLabelInput
 									type="email"
-									placeholder="you@example.com"
-									className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 ${
-										errors.email ? "border-red-500" : ""
-									}`}
+									label="Email"
 									value={email}
 									onChange={(e) => {
 										setEmail(e.target.value);
-										if (errors.email)
-											setErrors({ ...errors, email: undefined });
+										if (errors.email) setErrors({ ...errors, email: "" });
 									}}
 									disabled={loading}
+									error={errors.email}
 								/>
-								{errors.email && (
-									<p className="text-red-500 text-sm">{errors.email}</p>
-								)}
 							</div>
-							<div className="space-y-2">
-								<Label className="text-gray-700 font-medium">Password</Label>
-								<div className="relative">
-									<Input
-										type={showPassword ? "text" : "password"}
-										placeholder="••••••••"
-										className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 pr-12 ${
-											errors.password ? "border-red-500" : ""
-										}`}
-										value={password}
-										onChange={(e) => {
-											setPassword(e.target.value);
-											if (errors.password)
-												setErrors({ ...errors, password: undefined });
-										}}
-										disabled={loading}
-									/>
-									<button
-										type="button"
-										onClick={() => setShowPassword(!showPassword)}
-										className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-										disabled={loading}>
-										{showPassword ? (
-											<EyeOff className="w-5 h-5" />
-										) : (
-											<Eye className="w-5 h-5" />
-										)}
-									</button>
+							<div className="form-field">
+								<FloatingLabelInput
+									type={showPassword ? "text" : "password"}
+									label="Password"
+									value={password}
+									onChange={(e) => {
+										setPassword(e.target.value);
+										if (errors.password) setErrors({ ...errors, password: "" });
+									}}
+									disabled={loading}
+									error={errors.password}
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword(!showPassword)}
+									className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 transition-colors"
+									disabled={loading}
+									tabIndex={-1}>
+									{showPassword ? (
+										<EyeOff className="w-5 h-5" />
+									) : (
+										<Eye className="w-5 h-5" />
+									)}
+								</button>
+							</div>
+							{errors.form && (
+								<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+									<p className="text-red-600 text-sm font-medium">
+										{errors.form}
+									</p>
 								</div>
-								{errors.password && (
-									<p className="text-red-500 text-sm">{errors.password}</p>
-								)}
-							</div>{" "}
-							<div className="flex justify-end">
+							)}
+							<div className="flex justify-end form-field">
 								<a
 									href="/auth/forgot-password"
-									className="text-purple-500 text-sm hover:text-purple-600 transition-colors">
+									className="text-purple-500 text-sm font-medium hover:text-purple-600 transition-colors">
 									Forgot password?
 								</a>
 							</div>
 							<Button
+								type="submit"
 								disabled={loading}
-								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed form-field">
 								{loading ? "Signing in..." : "Sign In"}
 							</Button>
-							<div className="flex justify-center items-center gap-2 text-sm text-gray-600">
-								<span>Don't have an account?</span>
-								<a
-									href="/auth/register"
-									className="font-semibold text-purple-600 hover:text-purple-700 hover:underline underline-offset-2 transition-all duration-200">
-									Sign up
-								</a>
-							</div>
 						</form>
+						<div className="flex justify-center items-center gap-2 text-sm text-gray-600 form-field">
+							<span>Don't have an account?</span>
+							<a
+								href="/auth/register"
+								className="font-semibold text-purple-600 hover:text-purple-700 hover:underline underline-offset-2 transition-all duration-200">
+								Sign up
+							</a>
+						</div>
 					</div>
 				</div>
 

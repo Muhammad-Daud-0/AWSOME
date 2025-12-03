@@ -16,7 +16,6 @@ const complianceRoutes = require("./routes/complianceRoutes");
 
 const app = express();
 
-// Middleware
 app.use(
 	cors({
 		origin: process.env.COOKIE_DOMAIN || "http://localhost:5173",
@@ -26,10 +25,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve uploaded files as static - IMPORTANT: Must be before routes
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/lectures", lectureRoutes);
 app.use("/api/v1/community", communityRoutes);

@@ -13,21 +13,21 @@
 "use client";
 
 import { useState, useContext } from "react";
-import { ChevronLeft, ChevronRight, Cloud, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axiosInstance from "@/api/axios";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
-import { AuthContext } from "../../components/context/authContext"; // <-- import AuthContext
-import FormToggle from "@/components/forms/FormToggle";
+import { AuthContext } from "../../components/context/authContext";
+import FloatingLabelInput from "@/components/ui/FloatingLabelInput";
+import Logo from "@/components/Logo";
 
 const Register = () => {
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [showPassword, setShowPassword] = useState(false);
+	const [passwordFocused, setPasswordFocused] = useState(false);
 	const navigate = useNavigate();
 	const authContext = useContext(AuthContext);
 
@@ -99,26 +99,60 @@ const Register = () => {
 		setLoading(true);
 		try {
 			const { data } = await axiosInstance.post("/auth/register", formData);
-			toast.success(data.message);
+
+			console.log("Full registration response:", data);
+
+			// Extract user data - handle various response structures
+			const userObj = data.user || data;
+			const userRole = Number(userObj?.role) || 1;
+			const userName = userObj?.name || "";
+			const userEmail = userObj?.email || "";
+			const userToken = data.token || "";
+
+			console.log("Extracted data:", {
+				userRole,
+				userName,
+				userEmail,
+				userToken,
+			});
+			console.log("Role type:", typeof userRole, "Value:", userRole);
+
+			// Ensure role is 1 or 2
+			const validRole = userRole === 2 ? 2 : 1;
 
 			// Save in AuthContext & localStorage
 			login({
-				token: data.token,
-				role: data.user.role,
-				name: data.user.name,
-				email: data.user.email,
+				token: userToken,
+				role: validRole,
+				name: userName,
+				email: userEmail,
 			});
+
+			console.log("After login - about to navigate to /dashboard");
 
 			// Navigate to dashboard
 			navigate("/dashboard");
 		} catch (err: any) {
-			toast.error(err.response?.data?.message || "Registration failed");
+			const errorMessage = err.response?.data?.message;
+			console.error("Registration error:", errorMessage);
+			// Set errors to display in form fields
+			if (errorMessage?.toLowerCase().includes("email")) {
+				setErrors({ ...errors, email: errorMessage });
+			} else if (errorMessage?.toLowerCase().includes("username")) {
+				setErrors({ ...errors, username: errorMessage });
+			} else if (
+				errorMessage?.toLowerCase().includes("access") ||
+				errorMessage?.toLowerCase().includes("denied")
+			) {
+				// For access denied, show it on a general form error area
+				setErrors({ ...errors, form: errorMessage || "Access denied" });
+			} else {
+				setErrors({ ...errors, form: errorMessage || "Registration failed" });
+			}
 		} finally {
 			setLoading(false);
 		}
-	};
-
-	// ---------------- Google Login ----------------
+	}; // ---------------- Google Login ----------------
 	const handleGoogleLogin = async (response: CredentialResponse) => {
 		if (!response.credential) return;
 		setLoading(true);
@@ -126,7 +160,6 @@ const Register = () => {
 			const { data } = await axiosInstance.post("/auth/google-login", {
 				tokenId: response.credential,
 			});
-			toast.success("Google login successful");
 
 			// Google login is always role=1
 			login({
@@ -140,7 +173,10 @@ const Register = () => {
 			navigate("/dashboard");
 		} catch (err: any) {
 			console.error(err);
-			toast.error(err.response?.data?.message || "Google login failed");
+			setErrors({
+				...errors,
+				form: err.response?.data?.message || "Google login failed",
+			});
 		} finally {
 			setLoading(false);
 		}
@@ -159,36 +195,16 @@ const Register = () => {
 			<div className="grid grid-cols-2 min-h-screen">
 				{/* Left Column - Form */}
 				<div className="bg-white p-8 lg:p-12 flex flex-col justify-center">
-					<Toaster
-						position="top-center"
-						toastOptions={{
-							duration: 1000,
-							style: {
-								background: "#1f1f1f",
-								color: "#fff",
-								padding: "12px 16px",
-								borderRadius: "10px",
-								fontSize: "14px",
-							},
-							success: {
-								style: { background: "#22c55e" },
-							},
-							error: {
-								style: { background: "#ef4444" },
-							},
-						}}
-					/>
 					<div className="max-w-md mx-auto w-full space-y-8">
 						{/* Logo */}
 						<button onClick={() => navigate("/")}>
 							<div className="flex items-center gap-2">
 								<div className="w-14 h-14 rounded-xl gradient-purple flex items-center justify-center shadow-lg group-hover:shadow-purple-glow transition-all duration-300">
-									<Cloud className="w-9 h-9 text-white" />
+									<Logo />
 								</div>
 								<span className="text-3xl font-bold text-gradient">AWSOME</span>
 							</div>
 						</button>
-
 						{/* Heading */}
 						<div className="space-y-3">
 							<h1 className="text-4xl font-bold text-gray-900">
@@ -199,13 +215,13 @@ const Register = () => {
 								sign-up method
 							</p>
 						</div>
-
 						{/* Google Sign-In */}
 						<GoogleLogin
 							onSuccess={handleGoogleLogin}
-							onError={() => toast.error("Google login failed")}
+							onError={() =>
+								setErrors({ ...errors, form: "Google login failed" })
+							}
 						/>
-
 						{/* Divider */}
 						<div className="flex items-center gap-4">
 							<div className="flex-1 h-px bg-gray-200"></div>
@@ -214,72 +230,88 @@ const Register = () => {
 							</span>
 							<div className="flex-1 h-px bg-gray-200"></div>
 						</div>
-
 						{/* Form */}
 						<form className="space-y-4" onSubmit={handleSubmit}>
 							{["name", "username", "email", "phone", "password", "answer"].map(
 								(field) => (
-									<div key={field} className="space-y-2">
-										<Label
-											htmlFor={field}
-											className="text-gray-700 font-medium">
-											{field.charAt(0).toUpperCase() + field.slice(1)}
-											<span className="text-red-500">*</span>
-										</Label>
+									<div key={field} className="form-field">
 										{field === "password" ? (
-											<div className="relative">
-												<Input
-													id={field}
-													type={showPassword ? "text" : "password"}
-													placeholder="••••••••"
-													className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 placeholder:text-gray-300 pr-12 ${
-														errors[field] ? "border-red-500" : ""
-													}`}
-													value={formData[field as keyof typeof formData]}
-													onChange={handleChange}
-													disabled={loading}
-												/>
-												<button
-													type="button"
-													onClick={() => setShowPassword(!showPassword)}
-													className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-													disabled={loading}>
-													{showPassword ? (
-														<EyeOff className="w-5 h-5" />
-													) : (
-														<Eye className="w-5 h-5" />
-													)}
-												</button>
+											<div className="space-y-1">
+												<div
+													className={`relative flex items-center border-[1.5px] rounded-lg transition-all duration-300 bg-white focus-within:border-purple-500 focus-within:shadow-[0_0_0_2px_rgba(109,40,217,0.1)] ${
+														errors[field] ? "border-red-500" : "border-gray-200"
+													}`}>
+													<input
+														id={field}
+														type={showPassword ? "text" : "password"}
+														placeholder=" "
+														className={`w-full h-14 px-4 pt-6 pb-3 bg-transparent text-gray-900 text-base focus:outline-none focus:ring-0 pr-12 ${
+															errors[field] ? "text-red-600" : ""
+														}`}
+														value={formData[field as keyof typeof formData]}
+														onChange={handleChange}
+														onFocus={() => setPasswordFocused(true)}
+														onBlur={() =>
+															setPasswordFocused(
+																!!formData[field as keyof typeof formData]
+															)
+														}
+														disabled={loading}
+													/>
+													<label
+														className={`absolute left-4 pointer-events-none transition-all duration-300 origin-left inline-flex items-center gap-1 whitespace-nowrap z-10 ${
+															formData[field as keyof typeof formData] ||
+															passwordFocused
+																? "-top-2.5 scale-95 text-sm font-semibold text-purple-600 px-2 py-1 border border-purple-600 rounded-full bg-white"
+																: "top-1/2 -translate-y-1/2 scale-100 text-base font-normal text-gray-500"
+														}`}>
+														{field.charAt(0).toUpperCase() + field.slice(1)}
+													</label>
+													<button
+														type="button"
+														onClick={() => setShowPassword(!showPassword)}
+														className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+														disabled={loading}>
+														{showPassword ? (
+															<EyeOff className="w-5 h-5" />
+														) : (
+															<Eye className="w-5 h-5" />
+														)}
+													</button>
+												</div>
+												{errors[field] && (
+													<p className="text-red-500 text-xs font-medium pl-1">
+														{errors[field]}
+													</p>
+												)}
 											</div>
 										) : (
-											<Input
+											<FloatingLabelInput
 												id={field}
 												type="text"
-												placeholder={
-													field === "answer"
-														? "Who is your idol?"
-														: `Enter your ${field}`
-												}
-												className={`h-12 border-gray-200 focus:ring-2 focus:ring-purple-500 placeholder:text-gray-300 ${
-													errors[field] ? "border-red-500" : ""
-												}`}
+												label={field.charAt(0).toUpperCase() + field.slice(1)}
 												value={formData[field as keyof typeof formData]}
 												onChange={handleChange}
 												disabled={loading}
+												error={errors[field]}
 											/>
-										)}
-										{errors[field] && (
-											<p className="text-red-500 text-sm">{errors[field]}</p>
 										)}
 									</div>
 								)
 							)}
+							{errors.form && (
+								<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+									<p className="text-red-600 text-sm font-medium">
+										{errors.form}
+									</p>
+								</div>
+							)}
 							<Button
 								disabled={loading}
-								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed form-field">
 								{loading ? "Creating Account..." : "Create Account"}
 							</Button>
-							<div className="flex justify-center items-center gap-2 text-sm text-gray-600">
+							<div className="flex justify-center items-center gap-2 text-sm text-gray-600 form-field">
 								<span>Already have an account?</span>
 								<a
 									href="/auth/login"

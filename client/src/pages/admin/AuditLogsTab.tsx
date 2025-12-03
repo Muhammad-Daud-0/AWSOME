@@ -1,10 +1,21 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * eslint-disable @typescript-eslint/no-explicit-any
+ *
+ * @format
+ */
+
 /** @format */
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertCircle, Clock, Loader2, Trash2 } from "lucide-react";
+import {
+	CheckCircle2,
+	AlertCircle,
+	Clock,
+	Loader2,
+	Trash2,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import axiosInstance from "@/api/axios";
 import { Button } from "@/components/ui/button";
@@ -84,9 +95,7 @@ const AuditLogsTab = () => {
 
 		setIsDeleting(true);
 		try {
-			const response = await axiosInstance.delete(
-				`/audit/${deleteLog._id}`
-			);
+			const response = await axiosInstance.delete(`/audit/${deleteLog._id}`);
 			if (response.data.success) {
 				toast.success("Audit log deleted successfully");
 				setDeleteLog(null);
@@ -162,7 +171,9 @@ const AuditLogsTab = () => {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-2xl font-bold text-yellow-500">{stats.warning}</p>
+						<p className="text-2xl font-bold text-yellow-500">
+							{stats.warning}
+						</p>
 					</CardContent>
 				</Card>
 
@@ -250,7 +261,9 @@ const AuditLogsTab = () => {
 			</Card>
 
 			{/* Delete Confirmation Dialog */}
-			<AlertDialog open={!!deleteLog} onOpenChange={(open) => !open && setDeleteLog(null)}>
+			<AlertDialog
+				open={!!deleteLog}
+				onOpenChange={(open) => !open && setDeleteLog(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Delete Audit Log</AlertDialogTitle>
@@ -260,9 +273,7 @@ const AuditLogsTab = () => {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<div className="flex gap-3 justify-end">
-						<AlertDialogCancel disabled={isDeleting}>
-							Cancel
-						</AlertDialogCancel>
+						<AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={handleDeleteLog}
 							disabled={isDeleting}

@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import {
 	ArrowRight,
-	Cloud,
-	Sparkles,
 	Shield,
 	Zap,
 	Globe,
@@ -17,6 +15,7 @@ import {
 	Rocket,
 	GitBranch,
 } from "lucide-react";
+import Logo from "@/components/Logo";
 import { ModuleCard } from "@/components/cards/ModuleCard";
 
 const Index = () => {
@@ -68,14 +67,12 @@ const Index = () => {
 
 			{/* Hero Section */}
 			<section className="container mx-auto px-4 py-14 md:py-20">
-				<div className=" p-6 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10">
+				<div className=" p-6 py-14 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10">
 					<div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
-						<div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 glass-card border border-border/40 mb-4">
+						{/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 glass-card border border-border/40 mb-4">
 							<Sparkles className="w-4 h-4 text-primary" />
-							<span className="text-sm font-medium text-foreground">
-								AI-Powered AWS Management
-							</span>
-						</div>
+							<span className="text-sm font-medium text-foreground"></span>
+						</div> */}
 
 						<h1 className="text-5xl md:text-7xl font-bold leading-tight">
 							Build, Deploy & Optimize{" "}
@@ -158,7 +155,7 @@ const Index = () => {
 				<div className="max-w-4xl mx-auto">
 					<div className="glass-card rounded-3xl p-12 text-center space-y-6 border border-border/40 shadow-xl">
 						<div className="w-16 h-16 rounded-2xl gradient-purple flex items-center justify-center mx-auto shadow-lg shadow-purple-glow/50">
-							<Cloud className="w-8 h-8 text-white" />
+							<Logo size="xl" />
 						</div>
 						<h2 className="text-3xl md:text-4xl font-bold">
 							Ready to Transform Your AWS Workflow?
@@ -186,7 +183,7 @@ const Index = () => {
 					<div className="flex flex-col md:flex-row items-center justify-between gap-4">
 						<div className="flex items-center gap-2">
 							<div className="w-8 h-8 rounded-lg gradient-purple flex items-center justify-center">
-								<Cloud className="w-5 h-5 text-white" />
+								<Logo size="sm" />
 							</div>
 							<span className="font-bold text-gradient">AWSOME</span>
 						</div>

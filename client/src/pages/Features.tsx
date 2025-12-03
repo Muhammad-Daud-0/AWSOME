@@ -3,6 +3,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
+import { useInView } from "@/hooks/useInView";
 import {
 	MessageSquare,
 	Network,
@@ -21,6 +22,10 @@ import {
 } from "lucide-react";
 
 const Features = () => {
+	const featuresRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const benefitsRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const securityRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const ctaRef = useInView({ threshold: 0.2, triggerOnce: true });
 	const mainFeatures = [
 		{
 			icon: MessageSquare,
@@ -165,7 +170,11 @@ const Features = () => {
 			<Navbar />
 
 			{/* Hero Section */}
-			<section className="container mx-auto px-4 py-20 text-center ">
+			<section
+				ref={featuresRef.ref}
+				className={`container mx-auto px-4 py-20 text-center transition-all duration-700 ${
+					featuresRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="p-8 py-28 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10 ">
 					<h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
 						Powerful Features for{" "}
@@ -181,7 +190,11 @@ const Features = () => {
 			</section>
 
 			{/* Main Features Grid */}
-			<section className="container mx-auto px-4 py-8">
+			<section
+				ref={benefitsRef.ref}
+				className={`container mx-auto px-4 py-8 transition-all duration-700 ${
+					benefitsRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 					{mainFeatures.map((feature, index) => {
 						const Icon = feature.icon;
@@ -216,7 +229,11 @@ const Features = () => {
 			</section>
 
 			{/* Advanced Features */}
-			<section className="container mx-auto px-4 py-16">
+			<section
+				ref={securityRef.ref}
+				className={`container mx-auto px-4 py-16 transition-all duration-700 ${
+					securityRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="text-center mb-12">
 					<h2 className="text-3xl font-bold mb-4 animate-fade-in">
 						Advanced Capabilities
@@ -309,7 +326,11 @@ const Features = () => {
 			</section>
 
 			{/* Feature Highlight */}
-			<section className="container mx-auto px-4 py-16">
+			<section
+				ref={ctaRef.ref}
+				className={`container mx-auto px-4 py-16 transition-all duration-700 ${
+					ctaRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 border border-purple-500/20 rounded-2xl p-12 text-center animate-fade-in">
 					<h2 className="text-3xl font-bold mb-4">Continuous Innovation</h2>
 					<p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">

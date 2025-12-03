@@ -4,7 +4,8 @@ import { Toaster } from "../src/components/ui/toaster";
 import { Toaster as Sonner } from "../src/components/ui/sonner";
 import { TooltipProvider } from "../src/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "./components/context/authContext";
 import {
@@ -13,7 +14,7 @@ import {
 	AuthenticatedRoute,
 } from "./components/PrivateRoutes";
 import Index from "./pages/Index";
-import Dashboard from "./pages/user/UserDashboard";
+import UserDashboard from "./pages/user/UserDashboard";
 import Chatbot from "./pages/user/Chatbot";
 import ArchitectureDesigner from "./pages/user/ArchitectureDesigner";
 import CostEstimate from "./pages/user/CostEstimate";
@@ -24,7 +25,7 @@ import ImportResources from "./pages/user/ImportResources";
 import DevOps from "./pages/user/DevOps";
 import Performance from "./pages/user/Performance";
 import Feedback from "./pages/user/Feedback";
-import Admin from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserDetails from "./pages/user/UserDetails";
 import APIIntegration from "./pages/user/APIIntegration";
 import Education from "./pages/user/Education";
@@ -41,6 +42,17 @@ import ContactUs from "./pages/ContactUs";
 
 const queryClient = new QueryClient();
 
+// ScrollToTop component - scrolls to top on route change
+const ScrollToTop = () => {
+	const { pathname } = useLocation();
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, [pathname]);
+
+	return null;
+};
+
 const App = () => (
 	<QueryClientProvider client={queryClient}>
 		<TooltipProvider>
@@ -49,6 +61,7 @@ const App = () => (
 			<GoogleOAuthProvider
 				clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
 				<BrowserRouter>
+					<ScrollToTop />
 					<AuthProvider>
 						<Routes>
 							{/* Public Routes */}
@@ -70,7 +83,7 @@ const App = () => (
 								path="/dashboard"
 								element={
 									<UserPrivateRoute>
-										<Dashboard />
+										<UserDashboard />
 									</UserPrivateRoute>
 								}
 							/>
@@ -176,7 +189,7 @@ const App = () => (
 								path="/admin"
 								element={
 									<AdminPrivateRoute>
-										<Admin />
+										<AdminDashboard />
 									</AdminPrivateRoute>
 								}
 							/>

@@ -1,4 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * eslint-disable @typescript-eslint/no-explicit-any
+ *
+ * @format
+ */
+
 /** @format */
 
 import { useState, useEffect } from "react";
@@ -260,7 +265,7 @@ const ComplianceTab = () => {
 		if (!deletePolicy) return;
 
 		setIsDeletingPolicy(true);
-		console.log(deletePolicy)
+		console.log(deletePolicy);
 		try {
 			const response = await axiosInstance.delete(
 				`/compliance/policies/${deletePolicy.id}`
@@ -387,7 +392,7 @@ const ComplianceTab = () => {
 		if (!deletePlan) return;
 
 		setIsDeletingPlan(true);
-		console.log(deletePlan)
+		console.log(deletePlan);
 		try {
 			const response = await axiosInstance.delete(
 				`/compliance/plans/${deletePlan.id}`

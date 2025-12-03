@@ -1,16 +1,16 @@
 /**
- * eslint-disable @typescript-eslint/no-explicit-any
  *
  * @format
  */
 
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Cloud, Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { AuthContext } from "./context/authContext";
+import { AuthContext } from "../context/authContext";
 import { useContext } from "react";
 import toast from "react-hot-toast";
+import Logo from "@/components/Logo";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -47,11 +47,15 @@ const Navbar = () => {
 	return (
 		<nav className="sticky top-0 z-50 w-full border-b border-border/40 glass-card">
 			<div className="container mx-auto max-w-screen-2xl px-4 h-16 flex items-center justify-between">
-				<Link to="/" className="flex items-center gap-2 group">
-					<div className="w-12 h-12 rounded-xl gradient-purple flex items-center justify-center shadow-lg group-hover:shadow-purple-glow transition-all duration-300">
-						<Cloud className="w-8 h-8 text-white" />
+				<Link
+					to="/"
+					className="flex items-center gap-2 group hover:opacity-80 transition-opacity">
+					<div className="w-10 h-10 rounded-sm gradient-purple flex items-center justify-center">
+						<Logo size="sm" />
 					</div>
-					<span className="text-xl font-bold text-gradient">AWSOME</span>
+					<span className="font-bold text-gradient hidden sm:inline">
+						AWSOME
+					</span>
 				</Link>
 				{/* Desktop Navigation */}
 				<div className="hidden md:flex items-center gap-8 flex-1 justify-center">
@@ -84,7 +88,7 @@ const Navbar = () => {
 												<User className="w-10 h-10 text-white" />
 											</div>
 											<span className="text-sm font-medium">
-												Hello, Admin {user.name}
+												Hello, {user.name}
 											</span>
 										</>
 									) : (
@@ -110,7 +114,13 @@ const Navbar = () => {
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onClick={() => navigate("/dashboard")}
+									onClick={() => {
+										if (user.role === 1) {
+											navigate("/dashboard");
+										} else if (user.role === 2) {
+											navigate("/admin");
+										}
+									}}
 									className="cursor-pointer text-black">
 									<LogOut className="w-4 h-4 mr-2" />
 									Dashboard

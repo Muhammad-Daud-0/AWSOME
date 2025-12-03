@@ -3,10 +3,15 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
+import { useInView } from "@/hooks/useInView";
 import { CheckCircle2, X, ArrowRight } from "lucide-react";
 
 const Pricing = () => {
+	const heroRef = useInView({ threshold: 0.2, triggerOnce: true });
+	const plansRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const comparisonRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const ctaRef = useInView({ threshold: 0.2, triggerOnce: true });
 	const plans = [
 		{
 			name: "Starter",
@@ -92,7 +97,11 @@ const Pricing = () => {
 			<Navbar />
 
 			{/* Hero Section */}
-			<section className="container mx-auto px-4 py-20 text-center ">
+			<section
+				ref={heroRef.ref}
+				className={`container mx-auto px-4 py-20 text-center transition-all duration-700 ${
+					heroRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="p-8 py-28 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10 ">
 					<h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
 						Simple, Transparent <span className="text-gradient">Pricing</span>
@@ -107,7 +116,11 @@ const Pricing = () => {
 			</section>
 
 			{/* Pricing Cards */}
-			<section className="container mx-auto px-4 py-6">
+			<section
+				ref={plansRef.ref}
+				className={`container mx-auto px-4 py-6 transition-all duration-700 ${
+					plansRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
 					{plans.map((plan, index) => (
 						<div
@@ -180,7 +193,11 @@ const Pricing = () => {
 			</section>
 
 			{/* FAQ Section */}
-			<section className="container mx-auto px-4 py-16 max-w-2xl">
+			<section
+				ref={comparisonRef.ref}
+				className={`container mx-auto px-4 py-16 max-w-2xl transition-all duration-700 ${
+					comparisonRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<h2 className="text-3xl font-bold text-center mb-12">
 					Frequently Asked Questions
 				</h2>
@@ -220,7 +237,11 @@ const Pricing = () => {
 			</section>
 
 			{/* CTA Section */}
-			<section className="container mx-auto px-4 py-16">
+			<section
+				ref={ctaRef.ref}
+				className={`container mx-auto px-4 py-16 transition-all duration-700 ${
+					ctaRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-2xl p-12 text-center animate-fade-in">
 					<h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
 					<p className="text-lg text-muted-foreground mb-8">

@@ -83,6 +83,7 @@ All colors MUST be HSL.
 
   html {
     scrollbar-gutter: stable;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -91,6 +92,40 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+
+  /* Smooth scrolling enhancements */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  .scroll-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scroll-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.4);
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.6);
+  }
 
   /* Gradient utilities */
   .gradient-purple {
@@ -177,5 +212,152 @@ All colors MUST be HSL.
       opacity: 1;
       transform: translateX(0);
     }
+  }
+
+  /* Placeholder animations */
+  .placeholder-animate::placeholder {
+    color: hsl(var(--muted-foreground) / 0.5);
+    animation: placeholderFade 0.8s ease-out forwards;
+  }
+
+  @keyframes placeholderFade {
+    0% {
+      opacity: 0;
+      color: hsl(var(--muted-foreground) / 0);
+    }
+
+    50% {
+      opacity: 0.3;
+    }
+
+    100% {
+      opacity: 1;
+      color: hsl(var(--muted-foreground) / 0.5);
+    }
+  }
+
+  /* Label entrance animation */
+  .label-animate {
+    animation: labelSlideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @keyframes labelSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Input focus animation */
+  .input-animate {
+    animation: inputGlow 0.3s ease-out forwards;
+  }
+
+  @keyframes inputGlow {
+    from {
+      box-shadow: 0 0 0 0 hsl(var(--ring) / 0.2);
+    }
+
+    to {
+      box-shadow: 0 0 0 0 hsl(var(--ring) / 0);
+    }
+  }
+
+  /* Form field entrance stagger */
+  .form-field {
+    opacity: 0;
+    animation: fieldFadeInUp 0.5s ease-out forwards;
+  }
+
+  .form-field:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+
+  .form-field:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .form-field:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+
+  .form-field:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .form-field:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+
+  .form-field:nth-child(6) {
+    animation-delay: 0.3s;
+  }
+
+  @keyframes fieldFadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Label shimmer effect on hover */
+  .label-shimmer {
+    transition: color 0.3s ease;
+    background: linear-gradient(90deg,
+        hsl(var(--foreground)),
+        hsl(var(--accent)),
+        hsl(var(--foreground)));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .label-shimmer:hover {
+    animation: shimmer 0.6s ease-in-out;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% auto;
+    }
+
+    100% {
+      background-position: 200% auto;
+    }
+  }
+
+  /* Input underline animation */
+  .input-underline {
+    position: relative;
+  }
+
+  .input-underline::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg,
+        hsl(var(--primary)),
+        hsl(var(--accent)));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-underline:focus-within::after {
+    transform: scaleX(1);
   }
 }

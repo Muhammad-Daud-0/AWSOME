@@ -2,14 +2,14 @@
 
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Users, FileText, BookOpen } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import UsersTab from "@/components/admin/UsersTab";
-import EducationTab from "@/components/admin/EducationTab";
-import AuditLogsTab from "@/components/admin/AuditLogsTab";
-import ComplianceTab from "@/components/admin/ComplianceTab";
+import UsersTab from "@/pages/admin/UsersTab";
+import EducationTab from "@/pages/admin/EducationTab";
+import AuditLogsTab from "@/pages/admin/AuditLogsTab";
+import ComplianceTab from "@/pages/admin/ComplianceTab";
 
 const Admin = () => {
 	return (
@@ -17,7 +17,7 @@ const Admin = () => {
 			<Toaster
 				position="top-center"
 				toastOptions={{
-					duration: 700,
+					duration: 1000,
 					style: {
 						background: "#1f1f1f",
 						color: "#fff",

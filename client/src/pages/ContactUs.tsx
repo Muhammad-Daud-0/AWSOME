@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
+import { useInView } from "@/hooks/useInView";
 import toast from "react-hot-toast";
 import {
 	Mail,
@@ -17,6 +18,9 @@ import {
 } from "lucide-react";
 
 const ContactUs = () => {
+	const heroRef = useInView({ threshold: 0.2, triggerOnce: true });
+	const contactFormRef = useInView({ threshold: 0.1, triggerOnce: true });
+	const contactInfoRef = useInView({ threshold: 0.1, triggerOnce: true });
 	const [formData, setFormData] = useState({
 		name: "",
 		email: "",
@@ -116,7 +120,11 @@ const ContactUs = () => {
 			<Navbar />
 
 			{/* Hero Section */}
-			<section className="container mx-auto px-4 py-20 text-center ">
+			<section
+				ref={heroRef.ref}
+				className={`container mx-auto px-4 py-20 text-center transition-all duration-700 ${
+					heroRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="p-8 py-28 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10 ">
 					<h1 className="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
 						Get in Touch with <span className="text-gradient">Our Team</span>
@@ -131,7 +139,11 @@ const ContactUs = () => {
 			</section>
 
 			{/* Contact Methods */}
-			<section className="container mx-auto px-4 py-12">
+			<section
+				ref={contactInfoRef.ref}
+				className={`container mx-auto px-4 py-12 transition-all duration-700 ${
+					contactInfoRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
 					{contactInfo.map((info, index) => {
 						const Icon = info.icon;
@@ -160,7 +172,11 @@ const ContactUs = () => {
 			</section>
 
 			{/* Contact Form & Info */}
-			<section className="container mx-auto px-4 py-8">
+			<section
+				ref={contactFormRef.ref}
+				className={`container mx-auto px-4 py-8 transition-all duration-700 ${
+					contactFormRef.isInView ? "opacity-100" : "opacity-0"
+				}`}>
 				<div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 p-8 rounded-2xl bg-gradient-to-br from-purple-500/5 via-blue-500/5 to-transparent border border-purple-500/10">
 					{/* Form */}
 					<div className="animate-fade-in " style={{ animationDelay: "200ms" }}>

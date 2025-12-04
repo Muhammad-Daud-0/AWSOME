@@ -662,6 +662,58 @@ const logoutHandler = (req, res) => {
 	}
 };
 
+// ------------------- GET ADMIN BY ID -------------------
+const getAdminById = async (req, res) => {
+	try {
+		const { error } = getUserByIdSchema.validate(req.params);
+		if (error)
+			return res
+				.status(400)
+				.json({ success: false, message: error.details[0].message });
+
+		const { id } = req.params;
+		const admin = await userModel.findById(id).select("-password");
+		if (!admin)
+			return res
+				.status(404)
+				.json({ success: false, message: "Admin not found" });
+
+		// Verify the user is an admin
+		if (admin.role !== 2)
+			return res
+				.status(403)
+				.json({ success: false, message: "User is not an admin" });
+
+		res.status(200).json({
+			success: true,
+			admin: {
+				_id: admin._id,
+				name: admin.name,
+				email: admin.email,
+				username: admin.username,
+				phone: admin.phone,
+				role: "Admin",
+				status: admin.status || "active",
+				createdAt: admin.createdAt,
+				updatedAt: admin.updatedAt,
+				permissions: [
+					"User Management",
+					"Audit Logs",
+					"Compliance",
+					"Architecture",
+					"Lectures",
+					"Community Forum",
+				],
+			},
+		});
+	} catch (err) {
+		console.error(err);
+		res
+			.status(500)
+			.json({ success: false, message: "Server error", error: err.message });
+	}
+};
+
 // ------------------- TEST HANDLER -------------------
 const testHandler = (req, res) => {
 	res
@@ -679,6 +731,7 @@ module.exports = {
 	registerAdminHandler,
 	getTotalUsers,
 	getUserById,
+	getAdminById,
 	adminCreateUser,
 	adminGetAllUsers,
 	adminUpdateUser,

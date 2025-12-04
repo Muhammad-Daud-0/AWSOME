@@ -4,12 +4,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Navbar from "@/components/layout/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Users, FileText, BookOpen } from "lucide-react";
+import { Shield, Users, FileText, BookOpen, User } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import UsersTab from "@/pages/admin/UsersTab";
 import EducationTab from "@/pages/admin/EducationTab";
 import AuditLogsTab from "@/pages/admin/AuditLogsTab";
 import ComplianceTab from "@/pages/admin/ComplianceTab";
+import AdminProfileTab from "@/pages/admin/AdminProfileTab";
 
 const Admin = () => {
 	return (
@@ -68,7 +69,13 @@ const Admin = () => {
 						</div>
 						<Tabs defaultValue="users" className="w-full">
 							<div className="flex flex-row justify-center items-center">
-								<TabsList className="grid w-full max-w-4xl grid-cols-4 bg-slate-800/40 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-1">
+								<TabsList className="grid w-full max-w-6xl grid-cols-5 bg-slate-800/40 backdrop-blur-xl border border-cyan-500/20 rounded-xl p-1">
+									<TabsTrigger
+										value="profile"
+										className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-cyan-300 rounded-lg transition-all duration-300">
+										<User className="w-4 h-4 mr-2" />
+										Profile
+									</TabsTrigger>
 									<TabsTrigger
 										value="users"
 										className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-cyan-300 rounded-lg transition-all duration-300">
@@ -95,6 +102,11 @@ const Admin = () => {
 									</TabsTrigger>
 								</TabsList>
 							</div>
+
+							{/* Profile Tab */}
+							<TabsContent value="profile" className="space-y-6">
+								<AdminProfileTab />
+							</TabsContent>
 
 							{/* Users Tab */}
 							<TabsContent value="users" className="space-y-6">

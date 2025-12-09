@@ -1,0 +1,400 @@
+/**
+ * eslint-disable @typescript-eslint/no-explicit-any
+ *
+ * @format
+ */
+
+/**
+ * eslint-disable @typescript-eslint/no-explicit-any
+ *
+ * @format
+ */
+
+"use client";
+
+import { useState, useContext } from "react";
+import { ChevronLeft, ChevronRight, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import axiosInstance from "@/api/axios";
+import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../components/context/authContext";
+import FloatingLabelInput from "@/components/ui/FloatingLabelInput";
+import Logo from "@/components/Logo";
+
+const Register = () => {
+	const [currentImageIndex, setCurrentImageIndex] = useState(0);
+	const [loading, setLoading] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [passwordFocused, setPasswordFocused] = useState(false);
+	const navigate = useNavigate();
+	const authContext = useContext(AuthContext);
+
+	if (!authContext)
+		throw new Error("AuthContext must be used within AuthProvider");
+	const { login } = authContext;
+
+	const [formData, setFormData] = useState({
+		name: "",
+		username: "",
+		email: "",
+		phone: "",
+		password: "",
+		answer: "",
+	});
+
+	const [errors, setErrors] = useState<Record<string, string>>({});
+
+	const carouselItems = [
+		{
+			image: "/images/aws_Image1.jpeg",
+			heading: "Design your AWS Cloud Infrastructure",
+			description:
+				"Visualize and deploy your AWS cloud resources in real-time with ease and accuracy.",
+		},
+		{
+			image: "/images/aws_Image2.jpeg",
+			heading: "Monitor Your Data Centers",
+			description:
+				"Get a complete view of your global AWS data centers and network status.",
+		},
+		{
+			image: "/images/aws_Image3.jpeg",
+			heading: "Build Scalable Cloud Solutions",
+			description:
+				"Use Brainboard to design scalable, secure, and reliable cloud architectures quickly.",
+		},
+	];
+
+	const validateForm = () => {
+		const newErrors: Record<string, string> = {};
+		if (!formData.name.trim()) newErrors.name = "Name is required";
+		if (!formData.username.trim()) newErrors.username = "Username is required";
+		if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+			newErrors.email = "Valid email is required";
+		if (!formData.phone || !/^[0-9+\-\s()]+$/.test(formData.phone))
+			newErrors.phone = "Valid phone number is required";
+		if (!formData.password || formData.password.length < 6)
+			newErrors.password = "Password must be at least 6 characters";
+		if (!formData.answer.trim()) newErrors.answer = "Answer is required";
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
+	};
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { id, value } = e.target;
+		setFormData({ ...formData, [id]: value });
+		// Clear error for this field when user starts typing
+		if (errors[id]) {
+			setErrors({ ...errors, [id]: "" });
+		}
+	};
+
+	// ---------------- Email/Password Registration ----------------
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!validateForm()) return;
+
+		setLoading(true);
+		try {
+			const { data } = await axiosInstance.post("/auth/register", formData);
+
+			console.log("Full registration response:", data);
+
+			// Extract user data - handle various response structures
+			const userObj = data.user || data;
+			const roleValue = userObj?.role || 1;
+
+			// Convert role string to numeric: "Admin"→2, else→1
+			const roleMap: { [key: string]: 1 | 2 } = {
+				Admin: 2,
+				Developer: 1,
+				Viewer: 1,
+			};
+			const userRole: 1 | 2 =
+				typeof roleValue === "string"
+					? roleMap[roleValue] || 1
+					: roleValue === 2
+					? 2
+					: 1;
+
+			const userName = userObj?.name || "";
+			const userEmail = userObj?.email || "";
+			const userToken = data.token || "";
+
+			console.log("Extracted data:", {
+				userRole,
+				userName,
+				userEmail,
+				userToken,
+			});
+			console.log("Role type:", typeof userRole, "Value:", userRole);
+
+			// Ensure role is 1 or 2
+			const validRole = userRole === 2 ? 2 : 1;
+
+			// Save in AuthContext & localStorage
+			login({
+				token: userToken,
+				role: validRole,
+				name: userName,
+				email: userEmail,
+			});
+
+			console.log("After login - about to navigate to /dashboard");
+
+			// Navigate to dashboard
+			navigate("/user/dashboard");
+		} catch (err: any) {
+			const errorMessage = err.response?.data?.message;
+			console.error("Registration error:", errorMessage);
+			// Set errors to display in form fields
+			if (errorMessage?.toLowerCase().includes("email")) {
+				setErrors({ ...errors, email: errorMessage });
+			} else if (errorMessage?.toLowerCase().includes("username")) {
+				setErrors({ ...errors, username: errorMessage });
+			} else if (
+				errorMessage?.toLowerCase().includes("access") ||
+				errorMessage?.toLowerCase().includes("denied")
+			) {
+				// For access denied, show it on a general form error area
+				setErrors({ ...errors, form: errorMessage || "Access denied" });
+			} else {
+				setErrors({ ...errors, form: errorMessage || "Registration failed" });
+			}
+		} finally {
+			setLoading(false);
+		}
+	}; // ---------------- Google Login ----------------
+	const handleGoogleLogin = async (response: CredentialResponse) => {
+		if (!response.credential) return;
+		setLoading(true);
+		try {
+			const { data } = await axiosInstance.post("/auth/google-login", {
+				tokenId: response.credential,
+			});
+
+			// Google login is always role=1
+			login({
+				token: data.token,
+				role: 1,
+				name: data.user.name,
+				email: data.user.email,
+			});
+
+			// Navigate to dashboard
+			navigate("/user/dashboard");
+		} catch (err: any) {
+			console.error(err);
+			setErrors({
+				...errors,
+				form: err.response?.data?.message || "Google login failed",
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// ---------------- Carousel ----------------
+	const nextImage = () =>
+		setCurrentImageIndex((prev) => (prev + 1) % carouselItems.length);
+	const prevImage = () =>
+		setCurrentImageIndex(
+			(prev) => (prev - 1 + carouselItems.length) % carouselItems.length
+		);
+
+	return (
+		<div className="min-h-screen bg-white">
+			<div className="grid grid-cols-2 min-h-screen">
+				{/* Left Column - Form */}
+				<div className="bg-white p-8 lg:p-12 flex flex-col justify-center">
+					<div className="max-w-md mx-auto w-full space-y-8">
+						{/* Logo */}
+						<button onClick={() => navigate("/")}>
+							<div className="flex items-center gap-2">
+								<div className="w-14 h-14 rounded-xl gradient-purple flex items-center justify-center shadow-lg group-hover:shadow-purple-glow transition-all duration-300">
+									<Logo />
+								</div>
+								<span className="text-3xl font-bold text-gradient">AWSOME</span>
+							</div>
+						</button>
+						{/* Heading */}
+						<div className="space-y-3">
+							<h1 className="text-4xl font-bold text-gray-900">
+								Welcome to AWSOME
+							</h1>
+							<p className="text-gray-500 text-lg">
+								Let's get started with your 21-day free trial. Select your
+								sign-up method
+							</p>
+						</div>
+						{/* Google Sign-In */}
+						<GoogleLogin
+							onSuccess={handleGoogleLogin}
+							onError={() =>
+								setErrors({ ...errors, form: "Google login failed" })
+							}
+						/>
+						{/* Divider */}
+						<div className="flex items-center gap-4">
+							<div className="flex-1 h-px bg-gray-200"></div>
+							<span className="text-gray-400 text-sm">
+								or continue with email
+							</span>
+							<div className="flex-1 h-px bg-gray-200"></div>
+						</div>
+						{/* Form */}
+						<form className="space-y-4" onSubmit={handleSubmit}>
+							{["name", "username", "email", "phone", "password", "answer"].map(
+								(field) => (
+									<div key={field} className="form-field">
+										{field === "password" ? (
+											<div className="space-y-1">
+												<div
+													className={`relative flex items-center border-[1.5px] rounded-lg transition-all duration-300 bg-white focus-within:border-purple-500 focus-within:shadow-[0_0_0_2px_rgba(109,40,217,0.1)] ${
+														errors[field] ? "border-red-500" : "border-gray-200"
+													}`}>
+													<input
+														id={field}
+														type={showPassword ? "text" : "password"}
+														placeholder=" "
+														className={`w-full h-14 px-4 pt-6 pb-3 bg-transparent text-gray-900 text-base focus:outline-none focus:ring-0 pr-12 ${
+															errors[field] ? "text-red-600" : ""
+														}`}
+														value={formData[field as keyof typeof formData]}
+														onChange={handleChange}
+														onFocus={() => setPasswordFocused(true)}
+														onBlur={() =>
+															setPasswordFocused(
+																!!formData[field as keyof typeof formData]
+															)
+														}
+														disabled={loading}
+													/>
+													<label
+														className={`absolute left-4 pointer-events-none transition-all duration-300 origin-left inline-flex items-center gap-1 whitespace-nowrap z-10 ${
+															formData[field as keyof typeof formData] ||
+															passwordFocused
+																? "-top-2.5 scale-95 text-sm font-semibold text-purple-600 px-2 py-1 border border-purple-600 rounded-full bg-white"
+																: "top-1/2 -translate-y-1/2 scale-100 text-base font-normal text-gray-500"
+														}`}>
+														{field.charAt(0).toUpperCase() + field.slice(1)}
+													</label>
+													<button
+														type="button"
+														onClick={() => setShowPassword(!showPassword)}
+														className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+														disabled={loading}>
+														{showPassword ? (
+															<EyeOff className="w-5 h-5" />
+														) : (
+															<Eye className="w-5 h-5" />
+														)}
+													</button>
+												</div>
+												{errors[field] && (
+													<p className="text-red-500 text-xs font-medium pl-1">
+														{errors[field]}
+													</p>
+												)}
+											</div>
+										) : (
+											<FloatingLabelInput
+												id={field}
+												type="text"
+												label={field.charAt(0).toUpperCase() + field.slice(1)}
+												value={formData[field as keyof typeof formData]}
+												onChange={handleChange}
+												disabled={loading}
+												error={errors[field]}
+											/>
+										)}
+									</div>
+								)
+							)}
+							{errors.form && (
+								<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+									<p className="text-red-600 text-sm font-medium">
+										{errors.form}
+									</p>
+								</div>
+							)}
+							<Button
+								disabled={loading}
+								className="w-full h-12 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed form-field">
+								{loading ? "Creating Account..." : "Create Account"}
+							</Button>
+							<div className="flex justify-center items-center gap-2 text-sm text-gray-600 form-field">
+								<span>Already have an account?</span>
+								<a
+									href="/auth/login"
+									className="font-semibold text-purple-600 hover:text-purple-700 hover:underline underline-offset-2 transition-all duration-200">
+									Sign in
+								</a>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				{/* Right Column - Carousel */}
+				<div className="bg-gradient-to-br from-purple-500 to-purple-700 p-8 lg:p-12 flex flex-col items-center justify-center relative overflow-hidden">
+					<div className="absolute inset-0 opacity-20">
+						<div className="absolute top-0 right-0 w-96 h-96 bg-purple-400 rounded-full blur-3xl"></div>
+						<div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-300 rounded-full blur-3xl"></div>
+					</div>
+
+					<div className="relative z-10 w-full max-w-md space-y-8">
+						<div className="relative h-64 rounded-2xl overflow-hidden shadow-2xl">
+							{carouselItems.map((item, index) => (
+								<img
+									key={index}
+									src={item.image || "/placeholder.svg"}
+									alt={`Carousel slide ${index + 1}`}
+									className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out ${
+										index === currentImageIndex ? "opacity-100" : "opacity-0"
+									}`}
+								/>
+							))}
+						</div>
+						<div className="text-center space-y-3 text-white">
+							<h2 className="text-2xl font-bold">
+								{carouselItems[currentImageIndex].heading}
+							</h2>
+							<p className="text-purple-100 text-sm leading-relaxed">
+								{carouselItems[currentImageIndex].description}
+							</p>
+						</div>
+						<div className="flex items-center justify-center gap-6 pt-4">
+							<button
+								onClick={prevImage}
+								className="w-12 h-12 rounded-full border-2 border-white text-white hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110">
+								<ChevronLeft className="w-5 h-5" />
+							</button>
+							<div className="flex gap-2">
+								{carouselItems.map((_, index) => (
+									<button
+										key={index}
+										onClick={() => setCurrentImageIndex(index)}
+										className={`w-2 h-2 rounded-full transition-all ${
+											index === currentImageIndex
+												? "bg-white w-6"
+												: "bg-white/50"
+										}`}
+									/>
+								))}
+							</div>
+							<button
+								onClick={nextImage}
+								className="w-12 h-12 rounded-full border-2 border-white text-white hover:bg-white/20 flex items-center justify-center transition-all hover:scale-110">
+								<ChevronRight className="w-5 h-5" />
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+export default Register;
